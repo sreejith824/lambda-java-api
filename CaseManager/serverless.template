@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  CreateCaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://pwapoc-sam/d2b53f803ec0b68aacc1065694c352fd
+      Handler: com.sreejith824.pwapoc.creditcase.CaseFunctionHandler::handleRequest
+      Runtime: java8
+      Events:
+        CreateCase:
+          Type: Api
+          Properties:
+            Path: /case
+            Method: post

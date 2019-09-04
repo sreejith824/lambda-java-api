@@ -1,0 +1,14 @@
+sam package \
+    --template-file template.yaml \
+    --output-template-file packaged.yaml \
+    --s3-bucket pwapoc-sam
+    
+sam deploy \
+    --template-file packaged.yaml \
+    --stack-name pwapoc-case \
+    --capabilities CAPABILITY_IAM    
+    
+--aws cloudformation deploy --template-file /Users/sreejithsasidharan/Softwares/accelerate-offline/CaseManager/packaged.yaml --stack-name pwapoc-case
+
+
+aws cloudformation validate-template --template-body template.yaml  

@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+ CreateCaseFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+   CodeUri: target/case-manager-1.0.0.jar
+   Handler: com.sreejith824.pwapoc.creditcase.CreateCaseFunctionHandler::handleRequest
+   Runtime: java8
+   Events:
+    CreateCase:
+     Type: Api
+     Properties:
+      Path: /case
+      Method: post
+      
+ GetCaseFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+   CodeUri: target/case-manager-1.0.0.jar
+   Handler: com.sreejith824.pwapoc.creditcase.GetCaseFunctionHandler::handleRequest
+   Runtime: java8
+   Events:
+    CreateCase:
+     Type: Api
+     Properties:
+      Path: /case
+      Method: get      
