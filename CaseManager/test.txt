@@ -11,4 +11,22 @@ sam deploy \
 --aws cloudformation deploy --template-file /Users/sreejithsasidharan/Softwares/accelerate-offline/CaseManager/packaged.yaml --stack-name pwapoc-case
 
 
-aws cloudformation validate-template --template-body template.yaml  
+aws cloudformation validate-template --template-body template.yaml      
+aws cloudformation package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket pwapoc-sam   
+aws cloudformation deploy --template-file packaged.yaml --stack-name pwapoc-case --capabilities CAPABILITY_IAM  
+
+--DDB
+aws cloudformation package --template-file templateDDB.yaml --output-template-file packagedDDB.yaml --s3-bucket pwapoc-sam
+aws cloudformation deploy --template-file packagedDDB.yaml --stack-name pwapoc-case-ddb --capabilities CAPABILITY_IAM
+
+--IAM
+aws cloudformation package --template-file templateIAM.yaml --output-template-file packagedIAM.yaml --s3-bucket pwapoc-sam
+aws cloudformation deploy --template-file packagedIAM.yaml --stack-name pwapoc-case-iam --capabilities CAPABILITY_IAM
+
+--LAMBDA
+aws cloudformation package --template-file templateLAMBDA.yaml --output-template-file packagedLAMBDA.yaml --s3-bucket pwapoc-sam
+aws cloudformation deploy --template-file packagedLAMBDA.yaml --stack-name pwapoc-case-LAMBDA --capabilities CAPABILITY_IAM
+
+--Stack
+aws cloudformation package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket pwapoc-sam
+aws cloudformation deploy --template-file packaged.yaml --stack-name pwapoc-case-stackv1 --capabilities CAPABILITY_IAM

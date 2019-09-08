@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  GetCaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://pwapoc-sam/f3550a6c393ff430d15fb8cfc0b19e5c
+      Handler: com.sreejith824.pwapoc.creditcase.handler.GetCaseFunctionHandler::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Timeout: 30
+      Role: arn:aws:iam::616030043679:role/pwapoc-case-stackv3-LambdaExecutionRole-1DZHB1WV8I1OI
+      Events:
+        GetCase:
+          Type: Api
+          Properties:
+            Path: /api/case
+            Method: get
+            Integration: lambda
+            Request:
+              template:
+                application/json: "{\n \"caseId\" : \"case123\"\n}  \n"

@@ -1,28 +1,130 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Resources:
- CreateCaseFunction:
-  Type: AWS::Serverless::Function
+ CaseDB: 
+  Type: AWS::DynamoDB::Table
+  Properties: 
+   AttributeDefinitions:
+    -
+     AttributeName: "id"
+     AttributeType: "S"
+   KeySchema: 
+    -
+     AttributeName: "id"
+     KeyType: "HASH"
+   ProvisionedThroughput: 
+    ReadCapacityUnits: "5"
+    WriteCapacityUnits: "5"
+   TableName: "caseData"
+
+       
+ LambdaExecutionRole:
+  Type: AWS::IAM::Role
   Properties:
-   CodeUri: target/case-manager-1.0.0.jar
-   Handler: com.sreejith824.pwapoc.creditcase.CreateCaseFunctionHandler::handleRequest
-   Runtime: java8
-   Events:
-    CreateCase:
-     Type: Api
-     Properties:
-      Path: /case
-      Method: post
+   AssumeRolePolicyDocument:
+    Version: '2012-10-17'
+    Statement:
+     Effect: Allow
+     Principal:
+      Service: lambda.amazonaws.com
+     Action: sts:AssumeRole
+   Path: "/"
+   
+ DynamoDBPolicies: 
+  Type: "AWS::IAM::Policy"
+  Properties: 
+   PolicyName: "ddbexecution"
+   PolicyDocument: 
+    Version: "2012-10-17"
+    Statement: 
+     - 
+      Effect: "Allow"
+      Action: "*"
+      Resource: !GetAtt CaseDB.Arn 
+   Roles: 
+    - 
+     Ref: "LambdaExecutionRole"   
+
       
  GetCaseFunction:
   Type: AWS::Serverless::Function
   Properties:
    CodeUri: target/case-manager-1.0.0.jar
-   Handler: com.sreejith824.pwapoc.creditcase.GetCaseFunctionHandler::handleRequest
+   Handler: com.sreejith824.pwapoc.creditcase.handler.GetCaseFunctionHandler::handleRequest
    Runtime: java8
-   Events:
-    CreateCase:
-     Type: Api
-     Properties:
-      Path: /case
-      Method: get      
+   MemorySize: 512
+   Timeout: 30
+   Role: !GetAtt LambdaExecutionRole.Arn
+
+
+ CaseRestApi:
+  Type: "AWS::ApiGateway::RestApi"
+  Properties:
+   Name: "CaseRestApi"
+   FailOnWarnings: "true"
+   
+ CaseResource:
+  Type: "AWS::ApiGateway::Resource"
+  Properties:
+   ParentId : 
+    Fn::GetAtt:
+     - "CaseRestApi"
+     - "RootResourceId"
+   PathPart: "case"
+   RestApiId:
+    Ref: "CaseRestApi" 
+ 
+ GetCaseMethod:
+  Type: "AWS::ApiGateway::Method"
+  Properties:
+   HttpMethod: "GET"
+   AuthorizationType: "NONE"
+   ResourceId:
+    Ref: "CaseResource"
+   RestApiId:
+    Ref: "CaseRestApi"
+   RequestParameters :
+    "method.request.path.caseId" : "TRUE"  
+   Integration:
+    Type: "AWS"
+    Uri :           
+     Fn::Join:
+      - ""
+      - - "arn:aws:apigateway:"
+        - !Ref "AWS::Region"
+        - ":lambda:path/"
+        - "/2015-03-31/functions/"
+        - Fn::GetAtt:
+          - GetCaseFunction
+          - Arn
+        - "/invocations"
+    IntegrationHttpMethod: "POST"
+    RequestParameters : 
+     "integration.request.path.caseId" : "method.request.path.caseId"
+    
+
+ CaseRestApiDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - "GetCaseMethod"
+    Properties:
+      RestApiId:
+       Ref: "CaseRestApi" 
+      StageName: "stage"  
+
+
+ CaseRestApiGatewayInvoke:
+  Type: "AWS::Lambda::Permission"
+  Properties: 
+   Action: lambda:InvokeFunction
+   FunctionName: !GetAtt 
+    - GetCaseFunction
+    - Arn
+   Principal: apigateway.amazonaws.com
+   SourceArn: !Join [
+    "", [ "arn:aws:execute-api:", 
+      {"Ref": "AWS::Region"}, ":", 
+      {"Ref": "AWS::AccountId"}, ":", 
+      !Ref CaseRestApi, "/*/*/*"
+      ]
+     ] 

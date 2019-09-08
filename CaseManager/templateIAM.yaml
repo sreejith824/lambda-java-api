@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+       
+ LambdaExecutionRole:
+  Type: AWS::IAM::Role
+  Properties:
+   AssumeRolePolicyDocument:
+    Version: '2012-10-17'
+    Statement:
+     Effect: Allow
+     Principal:
+      Service: lambda.amazonaws.com
+     Action: sts:AssumeRole
+   Path: "/"
+   
+ DynamoDBPolicies: 
+  Type: "AWS::IAM::Policy"
+  Properties: 
+   PolicyName: "ddbexecution"
+   PolicyDocument: 
+    Version: "2012-10-17"
+    Statement: 
+     - 
+      Effect: "Allow"
+      Action: "*"
+      Resource: "arn:aws:dynamodb:eu-north-1:616030043679:table/caseData"
+   Roles: 
+    - 
+     Ref: "LambdaExecutionRole"   
