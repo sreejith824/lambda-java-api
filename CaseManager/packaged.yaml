@@ -87,7 +87,8 @@ Resources:
           - ''
           - - 'arn:aws:apigateway:'
             - Ref: AWS::Region
-            - :lambda:path/
+            - ':'
+            - lambda:path/
             - /2015-03-31/functions/
             - Fn::GetAtt:
               - GetCaseFunction

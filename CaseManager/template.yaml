@@ -66,10 +66,7 @@ Resources:
  CaseResource:
   Type: "AWS::ApiGateway::Resource"
   Properties:
-   ParentId : 
-    Fn::GetAtt:
-     - "CaseRestApi"
-     - "RootResourceId"
+   ParentId : !GetAtt CaseRestApi.RootResourceId
    PathPart: "case"
    RestApiId:
     Ref: "CaseRestApi" 
@@ -91,17 +88,16 @@ Resources:
      
    Integration:
     Type: "AWS"
-    Uri :           
-     Fn::Join:
-      - ""
-      - - "arn:aws:apigateway:"
-        - !Ref "AWS::Region"
-        - ":lambda:path/"
-        - "/2015-03-31/functions/"
-        - Fn::GetAtt:
-          - GetCaseFunction
-          - Arn
-        - "/invocations"
+    Uri : !Join [
+     "", ["arn:aws:apigateway:",
+      {"Ref": "AWS::Region"}, ":",
+      "lambda:path/",
+      "/2015-03-31/functions/",
+      !GetAtt GetCaseFunction.Arn,
+      "/invocations" 
+      ]
+     ]
+
     IntegrationHttpMethod: "POST"
     RequestTemplates :
      "application/json" : "{ #foreach($param in $input.params().querystring.keySet()) \n \"$param\": \"$util.escapeJavaScript($input.params().querystring.get($param))\" \n #if($foreach.hasNext),#end \n #end }"
@@ -124,9 +120,7 @@ Resources:
   Type: "AWS::Lambda::Permission"
   Properties: 
    Action: lambda:InvokeFunction
-   FunctionName: !GetAtt 
-    - GetCaseFunction
-    - Arn
+   FunctionName: !GetAtt GetCaseFunction.Arn
    Principal: apigateway.amazonaws.com
    SourceArn: !Join [
     "", [ "arn:aws:execute-api:", 
