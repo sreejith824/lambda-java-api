@@ -2,20 +2,19 @@ package com.sreejith824.pwapoc.creditcase.domain;
 
 public class CreateCaseResponse {
 	
-	private CaseDetails caseDetails;
+	private String message;
 	
-	public CreateCaseResponse() {
-		// TODO Auto-generated constructor stub
+	public CreateCaseResponse(String message) {
+		this.message = message;
 	}
 
-	public CaseDetails getCaseDetails() {
-		return caseDetails;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setCaseDetails(CaseDetails caseDetails) {
-		this.caseDetails = caseDetails;
+	public void setMessage(String message) {
+		this.message = message;
 	}
-	
 	
 
 }
