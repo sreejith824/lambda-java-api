@@ -85,6 +85,10 @@ Resources:
     Ref: "CaseRestApi"
    RequestParameters :
     "method.request.querystring.caseId" : "TRUE"  
+   MethodResponses:
+    -
+     StatusCode: 200
+     
    Integration:
     Type: "AWS"
     Uri :           
@@ -100,8 +104,11 @@ Resources:
         - "/invocations"
     IntegrationHttpMethod: "POST"
     RequestTemplates :
-     "application/json" : "{\n \"caseId\" : \"method.request.querystring.caseId\"}"
+     "application/json" : "{ #foreach($param in $input.params().querystring.keySet()) \n \"$param\": \"$util.escapeJavaScript($input.params().querystring.get($param))\" \n #if($foreach.hasNext),#end \n #end }"
     
+    IntegrationResponses: 
+     -
+      StatusCode: 200
 
  CaseRestApiDeployment:
     Type: "AWS::ApiGateway::Deployment"
