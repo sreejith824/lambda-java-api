@@ -1,9 +1,6 @@
 com/sreejith824/pwapoc/creditcase/domain/CaseDetails.class
 com/sreejith824/pwapoc/creditcase/handler/CreateCaseFunctionHandler.class
 com/sreejith824/pwapoc/creditcase/domain/GetCaseResponse.class
-com/sreejith824/pwapoc/creditcase/domain/CaseResponse.class
 com/sreejith824/pwapoc/creditcase/handler/GetCaseFunctionHandler.class
 com/sreejith824/pwapoc/creditcase/dao/ConnectionUtil.class
-com/sreejith824/pwapoc/creditcase/domain/CaseRequest.class
-com/sreejith824/pwapoc/creditcase/domain/CreditCase.class
 com/sreejith824/pwapoc/creditcase/domain/GetCaseRequest.class
