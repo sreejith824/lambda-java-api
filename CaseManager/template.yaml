@@ -84,7 +84,7 @@ Resources:
    RestApiId:
     Ref: "CaseRestApi"
    RequestParameters :
-    "method.request.path.caseId" : "TRUE"  
+    "method.request.querystring.caseId" : "TRUE"  
    Integration:
     Type: "AWS"
     Uri :           
@@ -99,8 +99,8 @@ Resources:
           - Arn
         - "/invocations"
     IntegrationHttpMethod: "POST"
-    RequestParameters : 
-     "integration.request.path.caseId" : "method.request.path.caseId"
+    RequestTemplates :
+     "application/json" : "{\n \"caseId\" : \"method.request.querystring.caseId\"}"
     
 
  CaseRestApiDeployment:

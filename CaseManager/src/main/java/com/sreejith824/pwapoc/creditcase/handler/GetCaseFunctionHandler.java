@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -20,6 +22,18 @@ public class GetCaseFunctionHandler implements RequestHandler<Map<String, Object
 	
 	@Override
 	public GetCaseResponse handleRequest(Map<String, Object> getCaseRequest, Context context) {
+		
+		if (getCaseRequest!= null) {
+			for ( Entry<String, Object> entry : getCaseRequest.entrySet()) {
+				System.out.println("Get Inputkey : " + entry.getKey() + " &  value :  " + entry.getValue());;
+			}
+		}
+		
+		if (context!= null) {
+			System.out.println("Context # Function name : " + context.getFunctionName());
+		}
+		
+		
 		getDate();
 		DynamoDBMapper dbMapper = new DynamoDBMapper(ConnectionUtil.getDynamoDBConnection());
 		if (StringUtils.isNullOrEmpty(getCaseRequest.get("caseId").toString())) {

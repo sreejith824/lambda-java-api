@@ -43,7 +43,7 @@ Resources:
   GetCaseFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://pwapoc-sam/f7a928691b0d20781607ea97983d0779
+      CodeUri: s3://pwapoc-sam/967bafeeb2ca133b7cbee00effeb0a65
       Handler: com.sreejith824.pwapoc.creditcase.handler.GetCaseFunctionHandler::handleRequest
       Runtime: java8
       MemorySize: 512
@@ -77,7 +77,7 @@ Resources:
       RestApiId:
         Ref: CaseRestApi
       RequestParameters:
-        method.request.path.caseId: 'TRUE'
+        method.request.querystring.caseId: 'TRUE'
       Integration:
         Type: AWS
         Uri:
@@ -93,7 +93,10 @@ Resources:
             - /invocations
         IntegrationHttpMethod: POST
         RequestParameters:
-          integration.request.path.caseId: method.request.path.caseId
+          integration.request.querystring.caseId: method.request.querystring.caseId
+        RequestTemplates:
+          application/json: "{\n \"caseId\" : \"method.request.querystring.caseId\"\
+            }"
   CaseRestApiDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
