@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
+
+## Resources started
+
 Resources:
+
+##Dynamo DB table creation
+ 
  CaseDB: 
   Type: AWS::DynamoDB::Table
   Properties: 
@@ -17,6 +23,7 @@ Resources:
     WriteCapacityUnits: "5"
    TableName: "caseData"
 
+## IAM Role to execute Lambda function and 
        
  LambdaExecutionRole:
   Type: AWS::IAM::Role
@@ -30,6 +37,8 @@ Resources:
      Action: sts:AssumeRole
    Path: "/"
    
+## policy to act on dynamodb created above    
+
  DynamoDBPolicies: 
   Type: "AWS::IAM::Policy"
   Properties: 
@@ -45,6 +54,7 @@ Resources:
     - 
      Ref: "LambdaExecutionRole"   
 
+##Lambda function to get case from DynamoDB - Java
       
  GetCaseFunction:
   Type: AWS::Serverless::Function
@@ -55,13 +65,28 @@ Resources:
    MemorySize: 512
    Timeout: 30
    Role: !GetAtt LambdaExecutionRole.Arn
+   
+##Lambda function to get case from DynamoDB - Java
 
+ CreateCaseFunction:
+  Type: AWS::Serverless::Function
+  Properties:
+   CodeUri: target/case-manager-1.0.0.jar
+   Handler: com.sreejith824.pwapoc.creditcase.handler.CreateCaseFunctionHandler::handleRequest
+   Runtime: java8
+   MemorySize: 512
+   Timeout: 30
+   Role: !GetAtt LambdaExecutionRole.Arn  
+
+## API GW
 
  CaseRestApi:
   Type: "AWS::ApiGateway::RestApi"
   Properties:
    Name: "CaseRestApi"
    FailOnWarnings: "true"
+   
+## Create rest resource "case"
    
  CaseResource:
   Type: "AWS::ApiGateway::Resource"
@@ -70,6 +95,8 @@ Resources:
    PathPart: "case"
    RestApiId:
     Ref: "CaseRestApi" 
+
+## HTTP GET to get case using query string    
  
  GetCaseMethod:
   Type: "AWS::ApiGateway::Method"
@@ -105,18 +132,10 @@ Resources:
     IntegrationResponses: 
      -
       StatusCode: 200
+      
+## Lambda permission to API GW to execute GetCaseFunciotn  
 
- CaseRestApiDeployment:
-    Type: "AWS::ApiGateway::Deployment"
-    DependsOn:
-      - "GetCaseMethod"
-    Properties:
-      RestApiId:
-       Ref: "CaseRestApi" 
-      StageName: "stage"  
-
-
- CaseRestApiGatewayInvoke:
+ GetCaseRestApiGatewayInvoke:
   Type: "AWS::Lambda::Permission"
   Properties: 
    Action: lambda:InvokeFunction
@@ -129,3 +148,63 @@ Resources:
       !Ref CaseRestApi, "/*/*/*"
       ]
      ] 
+
+## HTTP POST to save case details
+  
+ CreateCaseMethod:
+  Type: "AWS::ApiGateway::Method"
+  Properties:
+   HttpMethod: "POST"
+   AuthorizationType: "NONE"
+   ResourceId:
+    Ref: "CaseResource"
+   RestApiId:
+    Ref: "CaseRestApi"
+   MethodResponses:
+    -
+     StatusCode: 200
+     
+   Integration:
+    Type: "AWS"
+    Uri : !Join [
+     "", ["arn:aws:apigateway:",
+      {"Ref": "AWS::Region"}, ":",
+      "lambda:path/",
+      "/2015-03-31/functions/",
+      !GetAtt CreateCaseFunction.Arn,
+      "/invocations" 
+      ]
+     ]
+
+    IntegrationHttpMethod: "POST"
+    IntegrationResponses: 
+     -
+      StatusCode: 200
+
+## Lambda permission to API GW to execute CreateCaseFunction  
+
+ CreateCaseRestApiGatewayInvoke:
+  Type: "AWS::Lambda::Permission"
+  Properties: 
+   Action: lambda:InvokeFunction
+   FunctionName: !GetAtt CreateCaseFunction.Arn
+   Principal: apigateway.amazonaws.com
+   SourceArn: !Join [
+    "", [ "arn:aws:execute-api:", 
+      {"Ref": "AWS::Region"}, ":", 
+      {"Ref": "AWS::AccountId"}, ":", 
+      !Ref CaseRestApi, "/*/*/*"
+      ]
+     ]      
+
+## Deploy APIs to Get case and create case APIs into stage
+     
+ CaseRestApiDeployment:
+  Type: "AWS::ApiGateway::Deployment"
+  DependsOn:
+   - "GetCaseMethod"
+   - "CreateCaseMethod"
+  Properties:
+   RestApiId:
+    Ref: "CaseRestApi" 
+   StageName: "stage"      
