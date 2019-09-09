@@ -43,7 +43,7 @@ Resources:
   GetCaseFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://pwapoc-sam/967bafeeb2ca133b7cbee00effeb0a65
+      CodeUri: s3://pwapoc-sam/1c09c01288f09cee43101463fcbc0560
       Handler: com.sreejith824.pwapoc.creditcase.handler.GetCaseFunctionHandler::handleRequest
       Runtime: java8
       MemorySize: 512

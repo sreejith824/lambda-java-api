@@ -5,8 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TimeZone;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -16,30 +14,20 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.util.StringUtils;
 import com.sreejith824.pwapoc.creditcase.dao.ConnectionUtil;
 import com.sreejith824.pwapoc.creditcase.domain.CaseDetails;
+import com.sreejith824.pwapoc.creditcase.domain.GetCaseRequest;
 import com.sreejith824.pwapoc.creditcase.domain.GetCaseResponse;
 
-public class GetCaseFunctionHandler implements RequestHandler<Map<String, Object> , GetCaseResponse> {
+public class GetCaseFunctionHandler implements RequestHandler<GetCaseRequest , GetCaseResponse> {
 	
 	@Override
-	public GetCaseResponse handleRequest(Map<String, Object> getCaseRequest, Context context) {
-		
-		if (getCaseRequest!= null) {
-			for ( Entry<String, Object> entry : getCaseRequest.entrySet()) {
-				System.out.println("Get Inputkey : " + entry.getKey() + " &  value :  " + entry.getValue());;
-			}
-		}
-		
-		if (context!= null) {
-			System.out.println("Context # Function name : " + context.getFunctionName());
-		}
-		
+	public GetCaseResponse handleRequest(GetCaseRequest getCaseRequest, Context context) {
 		
 		getDate();
 		DynamoDBMapper dbMapper = new DynamoDBMapper(ConnectionUtil.getDynamoDBConnection());
-		if (StringUtils.isNullOrEmpty(getCaseRequest.get("caseId").toString())) {
+		if (StringUtils.isNullOrEmpty(getCaseRequest.getCaseId().toString())) {
 			return new GetCaseResponse(dbMapper.load(CaseDetails.class, "case123"));
 		}
-		return new GetCaseResponse(dbMapper.load(CaseDetails.class, getCaseRequest.get("caseId").toString()));
+		return new GetCaseResponse(dbMapper.load(CaseDetails.class, getCaseRequest.getCaseId().toString()));
 		
 	}
 	
